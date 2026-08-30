@@ -6,11 +6,12 @@ It determines the appropriate application to open a file or URL based on
 user-defined rules in config.h.
 
 Note: This is a fork with:
+      - mime detection (using libmagic)
       - jarun's preferred default tools on Xubuntu
       - some optimizations
       - intended to be used with nnn - https://github.com/jarun/nnn
       - run with:
-        $ NNN_OPENER=/usr/local/bin/chndlr nnn -dDeEfnQru "$@"
+            $ NNN_OPENER=/usr/local/bin/chndlr nnn -dDeEfnQru "$@"
 
 Features
 --------

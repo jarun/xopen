@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <regex.h>
 #include <unistd.h>
+#include <stdbool.h>
+#include <magic.h>
 
 typedef struct {
 	const char *regex;
@@ -12,14 +14,13 @@ typedef struct {
 
 #include "config.h"
 
-int i;
-char cmd[BUFSIZ], *cmdv[BUFSIZ/16];
-regmatch_t match[9];
+static char cmd[BUFSIZ], *cmdv[BUFSIZ/16];
+static regmatch_t match[9];
 
 /* precompiled regex cache */
-regex_t *regex_cache = NULL;
+static regex_t *regex_cache = NULL;
 
-void
+static void
 init_regexes(void) {
 	int npairs = sizeof(pairs)/sizeof(*pairs);
 	regex_cache = malloc(npairs * sizeof(regex_t));
@@ -36,7 +37,7 @@ init_regexes(void) {
 	}
 }
 
-void
+static void
 cleanup_regexes(void) {
 	int npairs = sizeof(pairs)/sizeof(*pairs);
 	for (int i = 0; i < npairs; i++) {
@@ -45,7 +46,7 @@ cleanup_regexes(void) {
 	free(regex_cache);
 }
 
-int
+static int
 reexec(char *uri, const char **args) {
 	const char *arg;
 	char *p = cmd;
@@ -89,6 +90,26 @@ reexec(char *uri, const char **args) {
 	return execvp(*cmdv, cmdv);
 }
 
+static inline bool
+is_prefix(const char *restrict str, const char *restrict prefix, size_t len)
+{
+        return !strncmp(str, prefix, len);
+}
+
+static bool
+is_suffix(const char *restrict str, const char *restrict suffix)
+{
+        if (!str || !suffix)
+                return false;
+
+        size_t lenstr = strlen(str);
+        size_t lensuffix = strlen(suffix);
+
+        if (lensuffix > lenstr)
+                return false;
+
+        return (strcmp(str + (lenstr - lensuffix), suffix) == 0);
+}
 
 int
 main(int argc, char *argv[]){
@@ -99,7 +120,7 @@ main(int argc, char *argv[]){
 	init_regexes();
 
 	/* check regex and launch action if it matches argv[1] */
-	for (i=0; i < sizeof(pairs)/sizeof(*pairs); ++i) {
+	for (int i = 0; i < (sizeof(pairs) / sizeof(*pairs)); ++i) {
 		if (regexec(&regex_cache[i], argv[1], 9, match, 0) == 0) {
 			cleanup_regexes();
 			return reexec(argv[1], pairs[i].action);
@@ -108,12 +129,45 @@ main(int argc, char *argv[]){
 
 	cleanup_regexes();
 
-	/* alternatively, fall back to chndlr_fallback_cmd */
-	int len = strlen(chndlr_fallback_cmd) + strlen(argv[1]) + 1;
-	if (len > BUFSIZ) {
-		fprintf(stderr, "command too long\n");
-		return EXIT_FAILURE;
+	/* initialize magic cookie */
+	magic_t magic = magic_open(MAGIC_MIME_TYPE);
+	if (magic) {
+		/* load the default magic database */
+		if (magic_load(magic, NULL) == 0) {
+			/* get the MIME type of the file */
+			const char *mime = magic_file(magic, argv[1]);
+			if (mime) {
+				//printf("%s\n", mime);
+
+				if (is_prefix(mime, "image/", 6)) {
+					magic_close(magic);
+					return reexec(argv[1], pairs[IMAGE_INDEX].action);
+				}
+
+				if (is_prefix(mime, "audio/", 6)) {
+					magic_close(magic);
+
+					/* mocp cnanot play files without extension */
+					char * const args[] = {AUDIO_PLAYER, argv[1], NULL};
+					execvp(AUDIO_PLAYER, args);
+					return EXIT_FAILURE;
+				}
+
+				if (is_prefix(mime, "video/", 6)) {
+					magic_close(magic);
+					return reexec(argv[1], pairs[VIDEO_INDEX].action);
+				}
+
+				if (is_suffix(mime, "/pdf")) {
+					magic_close(magic);
+					return reexec(argv[1], pairs[PDF_INDEX].action);
+				}
+			}
+		}
+		magic_close(magic);
 	}
-	snprintf(cmd, BUFSIZ, "%s%s", chndlr_fallback_cmd, argv[1]);
-	return system(cmd);
+
+	char * const args[] = {FALLBACK_CMD, argv[1], NULL};
+	execvp(FALLBACK_CMD, args);
+	return EXIT_FAILURE;
 }

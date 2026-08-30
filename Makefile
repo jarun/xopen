@@ -13,7 +13,7 @@ options:
 	@echo "CC       = ${CC}"
 
 chndlr: ${SRC} config.mk config.h
-	${CC} ${CFLAGS} -o $@ $< ${LDFLAGS}
+	${CC} ${CFLAGS} -o $@ $< ${LDFLAGS} $(LDLIBS)
 
 clean:
 	@echo cleaning
