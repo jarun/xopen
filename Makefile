@@ -3,7 +3,6 @@
 include config.mk
 
 SRC = chndlr.c
-OBJ = ${SRC:.c=.o}
 
 all: options chndlr
 
@@ -13,17 +12,12 @@ options:
 	@echo "LDFLAGS  = ${LDFLAGS}"
 	@echo "CC       = ${CC}"
 
-.c.o:
-	${CC} -c ${CFLAGS} $<
-
-${OBJ}: config.mk config.h
-
-chndlr: ${OBJ}
-	${CC} -o $@ ${OBJ} ${LDFLAGS}
+chndlr: ${SRC} config.mk config.h
+	${CC} ${CFLAGS} -o $@ $< ${LDFLAGS}
 
 clean:
 	@echo cleaning
-	@rm -f chndlr ${OBJ}
+	@rm -f chndlr
 
 install: all
 	@cp -f chndlr /usr/bin/xdg-open

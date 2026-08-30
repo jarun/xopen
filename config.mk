@@ -1,5 +1,5 @@
 # flags
-CFLAGS = -std=c99 -pedantic -Wall -Os ${INCS}
+CFLAGS = -std=c99 -pedantic -Wall -O3 ${INCS}
 LDFLAGS = -s
 
 # compiler and linker
