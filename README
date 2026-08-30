@@ -5,9 +5,12 @@ chndlr is a simple, fast, and suckless replacement for xdg-open.
 It determines the appropriate application to open a file or URL based on
 user-defined rules in config.h.
 
-Note: This is a fork with my preferred default tools (on Xubuntu) and optimizations. Run with:
-
-    $ NNN_OPENER=/usr/local/bin/chndlr nnn -dDeEfnQru "$@"
+Note: This is a fork with:
+      - jarun's preferred default tools on Xubuntu
+      - some optimizations
+      - intended to be used with nnn - https://github.com/jarun/nnn
+      - run with:
+        $ NNN_OPENER=/usr/local/bin/chndlr nnn -dDeEfnQru "$@"
 
 Features
 --------
