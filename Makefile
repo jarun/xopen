@@ -1,27 +1,27 @@
-# chndlr - simple xdg-open replacement with fallback
+# xopen - simple xdg-open replacement with fallback
 
 include config.mk
 
-SRC = chndlr.c
+SRC = xopen.c
 
-all: options chndlr
+all: options xopen
 
 options:
-	@echo chndlr build options:
+	@echo xopen build options:
 	@echo "CFLAGS   = ${CFLAGS}"
 	@echo "LDFLAGS  = ${LDFLAGS}"
 	@echo "CC       = ${CC}"
 
-chndlr: ${SRC} config.mk config.h
+xopen: ${SRC} config.mk config.h
 	${CC} ${CFLAGS} -o $@ $< ${LDFLAGS} $(LDLIBS)
 
 clean:
 	@echo cleaning
-	@rm -f chndlr
+	@rm -f xopen
 
 install: all
-	@cp -f chndlr /usr/bin/xdg-open
-	@chmod 755 /usr/bin/xdg-open
+	@cp -f xopen /usr/local/bin/xopen
+	@chmod 755 /usr/local/bin/xopen
 
 uninstall:
-	-rm /usr/bin/xdg-open
+	-rm /usr/local/bin/xopen

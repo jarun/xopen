@@ -1,27 +1,28 @@
-chndlr
+xopen
 ======
 
-chndlr is a simple, fast, and suckless replacement for xdg-open.
-It determines the appropriate application to open a file or URL based on
-user-defined rules in config.h.
+xopen is a simple, fast and suckless replacement of xdg-open.
+It determines the appropriate application to open a file or URL
+based on the user-defined 'pairs' in config.h.
 
-Note: This is a fork with:
-      - mime detection (using libmagic)
-      - jarun's preferred default tools on Xubuntu
-      - some optimizations
-      - intended to be used with nnn - https://github.com/jarun/nnn
-      - run with:
-            $ NNN_OPENER=/usr/local/bin/chndlr nnn -dDeEfnQru "$@"
+config.h has the author's preferred applications on Xubuntu.
+Users should replace those with their preferences.
 
 Features
 --------
-* Minimal and fast
-* No unnecessary dependencies
-* Proven config.h configuration
+* Lightweight and fast
+* Minimal configuration
+* File extention detection
+* Mime detection (using libmagic)
 * Works on UNIX-like systems
 
 Installation
 ------------
+xopen requires the libmagic development package.
+Install it from your distro's package manager.
+For example, on Ubuntu - `apt install libmagic-dev`.
+
+Then compile and install the program:
 
 	$ make
 	$ sudo make install
@@ -29,14 +30,18 @@ Installation
 Usage
 -----
 
-	$ chndlr music.mp3
-	$ chndlr https://www.youtube.com/watch?v=dQw4w9WgXcQ
+	$ xopen music.mp3
+	$ xopen https://www.youtube.com/watch?v=PVD1LNDxOnc
+
+To use with file manager nnn (https://github.com/jarun/nnn), run:
+
+    $ NNN_OPENER=xopen nnn "$@"
 
 config.h
 --------
-chndlr uses config.h for configuration,
+xopen uses config.h for configuration,
 
-Entries to `pairs` can be added with easy to use macros P and WEB_PREFIX,
+New `pairs` can be added with easy to use macros P and WEB_PREFIX,
 
 	static const Pair pairs[] = {
 
@@ -50,21 +55,21 @@ Entries to `pairs` can be added with easy to use macros P and WEB_PREFIX,
 
 For the input,
 
-	$ chndlr 'https://www.github.com/bharatvaj/chndlr'
+	$ xopen 'https://www.github.com/jarun/xopen'
 
 We get,
 
 	%1 - https://www.github.com
-	%2 - bharatvaj
-	%3 - chndlr
+	%2 - jarun
+	%3 - xopen
 
-	%s - https://www.github.com/bharatvaj/chndlr
+	%s - https://www.github.com/jarun/xopen
 
 %0-%9 and %s are available for substituion.
 
 To know more the about capture group sytax, see regex(7).
 
-chndlr uses 'execvp()' instead of 'system()' to speed up launching processes.
+xopen uses 'execvp()' instead of 'system()' to speed up launching processes.
 This means that the following would NOT work.
 
 	/* config.h */
@@ -74,6 +79,4 @@ This means that the following would NOT work.
 
 Credits
 -------
-Forked from soap.
-https://github.com/FRIGN/soap
-
+Forked from chndlr - https://github.com/bharatvaj/chndlr

@@ -10,7 +10,7 @@
 
 #define P(RE,...) { RE, (const char*[]) { __VA_ARGS__, NULL} }
 
-//#define WEB_PREFIX(URL) "^(https?://www\\." URL "|https?://" URL ")"
+#define WEB_PREFIX(URL) "^(https?://www\\." URL "|https?://" URL ")"
 
 static const Pair pairs[] = {
 	/* regex                  action */
@@ -34,16 +34,16 @@ static const Pair pairs[] = {
 	P( "\\.(ppt|pptx)$", "wpp", "%s" ),
 
 	/* text (ignored - use nnn options -e and -E to let nnn open text files in the terminal) */
-	//P( "\\.(txt|md|rst)$", "mousepad", "%s" ),
-	//P( "\\.(htm|html|xhtml)$", FALLBACK_CMD, "%s" ),
+	P( "\\.(txt|md|rst)$", "mousepad", "%s" ),
+	P( "\\.(htm|html|xhtml)$", FALLBACK_CMD, "%s" ),
 
 	/* web */
-	// P( "^(mailto:|https?://|ftp://)", "xdg-open", "%s" ),
+	P( "^(mailto:|https?://|ftp://)", FALLBACK_CMD, "%s" ),
 
 	/* youtube */
-	// P( WEB_PREFIX("youtube.com/watch\\?|youtu\\.be/"), AUDIO_PLAYER, "%s"),
-	// P( WEB_PREFIX("github.com"), "xdg-open", "%s" ),
+	P( WEB_PREFIX("youtube.com/watch\\?|youtu\\.be/"), AUDIO_PLAYER, "%s"),
+	// P( WEB_PREFIX("github.com"), FALLBACK_CMD, "%s" ),
 };
 
 #undef P
-//#undef WEB_PREFIX
+#undef WEB_PREFIX
