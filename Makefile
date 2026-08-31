@@ -3,6 +3,7 @@
 include config.mk
 
 SRC = xopen.c
+LDLIBS = -lmagic
 
 all: options xopen
 
