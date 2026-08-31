@@ -35,7 +35,7 @@ static const Pair pairs[] = {
 
 	/* text (ignored - use nnn options -e and -E to let nnn open text files in the terminal) */
 	P( "\\.(txt|md|rst)$", "mousepad", "%s" ),
-	P( "\\.(htm|html|xhtml)$", "xdg-open", "%s" ),
+	P( "\\.(htm|html|xhtml)$", FALLBACK_CMD, "%s" ),
 
 	/* web */
 	// P( "^(mailto:|https?://|ftp://)", "xdg-open", "%s" ),
