@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <errno.h>
 #include <regex.h>
 #include <unistd.h>
 #if MAGIC == 1
@@ -69,13 +70,14 @@ init_regexes(void) {
 	int npairs = sizeof(pairs)/sizeof(*pairs);
 	regex_cache = malloc(npairs * sizeof(regex_t));
 	if (!regex_cache) {
-		fprintf(stderr, "memory allocation failed\n");
+		perror("malloc failed");
 		exit(EXIT_FAILURE);
 	}
 
 	for (int i = 0; i < npairs; i++) {
 		if (regcomp(&regex_cache[i], pairs[i].regex, REG_EXTENDED)) {
-			fprintf(stderr, "invalid regex: %s\n", pairs[i].regex);
+			errno = EINVAL;
+			perror(pairs[i].regex);
 			exit(EXIT_FAILURE);
 		}
 	}
