@@ -3,7 +3,7 @@ xopen
 
 xopen is a simple, fast and suckless replacement of xdg-open.
 It determines the appropriate application to open a file or URL
-based on the user-defined 'pairs' in config.h.
+based on the user-defined extension-command 'pairs' in config.h.
 
 config.h has the author's preferred applications on Xubuntu.
 Users should replace those with their preferences.
@@ -13,18 +13,20 @@ Features
 * Lightweight and fast
 * Minimal configuration
 * File extention detection
-* Mime detection (using libmagic)
+* Mime detection (optional, using libmagic)
 * Works on UNIX-like systems
 
 Installation
 ------------
-xopen requires the libmagic development package.
-Install it from your distro's package manager.
-For example, on Ubuntu - `apt install libmagic-dev`.
-
-Then compile and install the program:
-
 	$ make
+	$ sudo make install
+
+To enable MIME detection, install the libmagic development package
+from your distro's standard package manager and compile the feature in.
+For example, on Ubuntu (and family):
+
+	$ sudo apt install libmagic-dev
+	$ make O_MAGIC=1
 	$ sudo make install
 
 Usage
@@ -41,7 +43,7 @@ config.h
 --------
 xopen uses config.h for configuration,
 
-New `pairs` can be added with easy to use macros P and WEB_PREFIX,
+New 'pairs' can be added with easy to use macros P and WEB_PREFIX,
 
 	static const Pair pairs[] = {
 
@@ -69,8 +71,8 @@ We get,
 
 To know more the about capture group sytax, see regex(7).
 
-xopen uses 'execvp()' instead of 'system()' to speed up launching processes.
-This means that the following would NOT work.
+xopen uses 'posix_spawnp()' to spawn processes faster.
+So the following would NOT work.
 
 	/* config.h */
 

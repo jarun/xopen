@@ -3,7 +3,13 @@
 include config.mk
 
 SRC = xopen.c
-LDLIBS = -lmagic
+
+O_MAGIC := 0  # do not link with libmagic by default
+
+ifeq ($(strip $(O_MAGIC)),1)
+	CPPFLAGS += "-DMAGIC=1"
+	LDLIBS += "-lmagic"
+endif
 
 all: options xopen
 
@@ -14,7 +20,7 @@ options:
 	@echo "CC       = ${CC}"
 
 xopen: ${SRC} config.mk config.h
-	${CC} ${CFLAGS} -o $@ $< ${LDFLAGS} $(LDLIBS)
+	${CC} ${CPPFLAGS} ${CFLAGS} -o $@ $< ${LDFLAGS} $(LDLIBS)
 
 clean:
 	@echo cleaning
@@ -26,3 +32,5 @@ install: all
 
 uninstall:
 	-rm /usr/local/bin/xopen
+
+.PHONY: all xopen install uninstall clean

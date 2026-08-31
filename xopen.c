@@ -4,8 +4,10 @@
 #include <stdio.h>
 #include <regex.h>
 #include <unistd.h>
+#if MAGIC == 1
 #include <stdbool.h>
 #include <magic.h>
+#endif
 #include <spawn.h>
 #include <fcntl.h>
 #include <sys/wait.h>
@@ -132,6 +134,7 @@ reexec(char *uri, const char **args) {
 	return spawn(*cmdv, cmdv);
 }
 
+#if MAGIC == 1
 static inline bool
 is_prefix(const char *restrict str, const char *restrict prefix, size_t len)
 {
@@ -152,6 +155,7 @@ is_suffix(const char *restrict str, const char *restrict suffix)
 
         return (strcmp(str + (lenstr - lensuffix), suffix) == 0);
 }
+#endif
 
 int
 main(int argc, char *argv[]){
@@ -171,6 +175,7 @@ main(int argc, char *argv[]){
 
 	cleanup_regexes();
 
+#if MAGIC == 1
 	/* initialize magic cookie */
 	magic_t magic = magic_open(MAGIC_MIME_TYPE);
 	if (magic) {
@@ -207,6 +212,7 @@ main(int argc, char *argv[]){
 		}
 		magic_close(magic);
 	}
+#endif
 
 	char * const args[] = {FALLBACK_CMD, argv[1], NULL};
 	return spawn(FALLBACK_CMD, args);
