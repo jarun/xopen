@@ -6,6 +6,12 @@
 #include <unistd.h>
 #include <stdbool.h>
 #include <magic.h>
+#include <spawn.h>
+#include <fcntl.h>
+#include <sys/wait.h>
+
+/* Access the global system environment variables */
+extern char **environ;
 
 typedef struct {
 	const char *regex;
@@ -19,6 +25,42 @@ static regmatch_t match[9];
 
 /* precompiled regex cache */
 static regex_t *regex_cache = NULL;
+
+/*
+ * Wrapper function to launch a process completely detached in the background.
+ * Redirects stdin, stdout, and stderr to /dev/null so it doesn't pollute the terminal.
+ */
+static int
+spawn(const char *file, char *const argv[]) {
+	pid_t pid;
+	posix_spawn_file_actions_t actions;
+
+	/* Initialize the file actions structure */
+	if (posix_spawn_file_actions_init(&actions) != 0) {
+		perror("posix_spawn_file_actions_init failed");
+		return EXIT_FAILURE;
+	}
+
+	/* Cleanly redirect child's standard streams to /dev/null so it is detached */
+	// 0 = stdin, 1 = stdout, 2 = stderr
+	posix_spawn_file_actions_addopen(&actions, STDIN_FILENO, "/dev/null", O_RDONLY, 0);
+	posix_spawn_file_actions_addopen(&actions, STDOUT_FILENO, "/dev/null", O_WRONLY, 0);
+	posix_spawn_file_actions_addopen(&actions, STDERR_FILENO, "/dev/null", O_WRONLY, 0);
+
+	/* Spawn the child process asynchronously with the file modifications */
+	int spawn_status = posix_spawnp(&pid, file, &actions, NULL, argv, environ);
+
+	/* Always destroy file actions to prevent memory leaks */
+	posix_spawn_file_actions_destroy(&actions);
+
+	if (spawn_status != 0) {
+		perror("posix_spawnp failed");
+		return EXIT_FAILURE;
+	}
+
+	/* Return success immediately to let the parent process die */
+	return EXIT_SUCCESS;
+}
 
 static void
 init_regexes(void) {
@@ -87,7 +129,7 @@ reexec(char *uri, const char **args) {
 
 	cmdv[cmdv_idx] = NULL;
 
-	return execvp(*cmdv, cmdv);
+	return spawn(*cmdv, cmdv);
 }
 
 static inline bool
@@ -149,8 +191,7 @@ main(int argc, char *argv[]){
 
 					/* mocp cnanot play files without extension */
 					char * const args[] = {AUDIO_PLAYER, argv[1], NULL};
-					execvp(AUDIO_PLAYER, args);
-					return EXIT_FAILURE;
+					return spawn(AUDIO_PLAYER, args);
 				}
 
 				if (is_prefix(mime, "video/", 6)) {
@@ -168,6 +209,5 @@ main(int argc, char *argv[]){
 	}
 
 	char * const args[] = {FALLBACK_CMD, argv[1], NULL};
-	execvp(FALLBACK_CMD, args);
-	return EXIT_FAILURE;
+	return spawn(FALLBACK_CMD, args);
 }
