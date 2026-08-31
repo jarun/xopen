@@ -1,19 +1,22 @@
 xopen
-======
+=====
 
 xopen is a simple, fast and suckless replacement of xdg-open.
 It determines the appropriate application to open a file or URL
 based on the user-defined extension-command 'pairs' in config.h.
+It also has optional MIME detection support using libmagic.
 
-config.h has the author's preferred applications on Xubuntu.
-Users should replace those with their preferences.
+config.h has the author's preferred applications on Ubuntu.
+Users should replace those with their preferences and compile xopen.
+The utility is not supposed to be included in any distro.
 
 Features
 --------
 * Lightweight and fast
 * Minimal configuration
+* Minimal dependencies
 * File extention detection
-* Mime detection (optional, using libmagic)
+* MIME detection (compile-in)
 * Works on UNIX-like systems
 
 Installation
@@ -22,7 +25,7 @@ Installation
 	$ sudo make install
 
 To enable MIME detection, install the libmagic development package
-from your distro's standard package manager and compile the feature in.
+from the distro's standard package manager and compile the feature in.
 For example, on Ubuntu (and family):
 
 	$ sudo apt install libmagic-dev
@@ -31,13 +34,16 @@ For example, on Ubuntu (and family):
 
 Usage
 -----
-
 	$ xopen music.mp3
 	$ xopen https://www.youtube.com/watch?v=PVD1LNDxOnc
 
 To use with file manager nnn (https://github.com/jarun/nnn), run:
 
-    $ NNN_OPENER=xopen nnn "$@"
+	$ NNN_OPENER=xopen nnn "$@"
+
+To let nnn handle text files in the terminal and xopen the rest:
+
+	$ NNN_OPENER=xopen nnn -eE "$@"
 
 config.h
 --------
